@@ -1,0 +1,6 @@
+include 'runtime'
+include 'compiler'
+include 'integration-test-library-java'
+include 'integration-test-sample-java'
+include 'integration-test-library-kotlin'
+include 'integration-test-sample-kotlin'

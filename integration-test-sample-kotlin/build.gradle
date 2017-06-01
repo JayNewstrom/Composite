@@ -1,0 +1,17 @@
+apply plugin: 'kotlin'
+apply plugin: 'kotlin-kapt'
+apply plugin: 'application'
+
+mainClassName = 'sample.app.Main'
+
+dependencies {
+    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+    compile project(':runtime')
+    compile project(':integration-test-library-kotlin')
+    kapt project(':compiler')
+}
+
+apply plugin: 'org.jlleitschuh.gradle.ktlint'
+ktlint {
+    version = '0.8.1'
+}

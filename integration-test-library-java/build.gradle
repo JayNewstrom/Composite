@@ -1,0 +1,7 @@
+apply plugin: 'java'
+apply plugin: 'net.ltgt.apt'
+
+dependencies {
+    implementation project(':runtime')
+    apt project(':compiler')
+}
