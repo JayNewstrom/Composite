@@ -15,4 +15,4 @@ cache:
     - $HOME/.m2
 
 script:
-  - ./gradlew test run ktlint checkstyle
+  - ./gradlew test run ktlintCheck checkstyle
