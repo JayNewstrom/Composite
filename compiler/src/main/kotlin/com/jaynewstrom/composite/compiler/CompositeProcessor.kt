@@ -146,7 +146,17 @@ class CompositeProcessor : AbstractProcessor() {
         val contributingToClassName = ClassName.get(elementUtils.getTypeElement(appModuleAnnotation.value))
         val builder = TypeSpec.classBuilder("Generated${contributingToClassName.simpleName()}Module")
                 .addModifiers(Modifier.FINAL)
-                .addMethod(modulesMethod(contributingToClassName, libraryModuleNames))
+
+        if (appModuleAnnotation.single) {
+            if (libraryModuleNames.size != 1) {
+                error(appModuleElement, "Library modules included must be exactly one.\nActual library modules included are: %s", libraryModuleNames)
+                return
+            }
+            builder.addMethod(moduleMethod(contributingToClassName, libraryModuleNames))
+        } else {
+            builder.addMethod(modulesMethod(contributingToClassName, libraryModuleNames))
+        }
+
         val appModuleClassName = ClassName.get(appModuleElement.asType()) as ClassName
         val file = JavaFile.builder(appModuleClassName.packageName(), builder.build()).build()
         try {
@@ -156,13 +166,19 @@ class CompositeProcessor : AbstractProcessor() {
         }
     }
 
+    private fun moduleMethod(contributingToClassName: ClassName, libraryModuleNames: List<String>): MethodSpec {
+        val builder = MethodSpec.methodBuilder("module").returns(contributingToClassName)
+        builder.addStatement("return new \$T()", elementUtils.getTypeElement(libraryModuleNames[0]))
+        return builder.build()
+    }
+
     private fun modulesMethod(contributingToClassName: ClassName, libraryModuleNames: List<String>): MethodSpec {
         val builder = MethodSpec.methodBuilder("modules")
                 .returns(ParameterizedTypeName.get(ClassName.get(Set::class.java), contributingToClassName))
         builder.addStatement("\$T<\$T> modules = new \$T<>(\$L)",
                 Set::class.java, contributingToClassName, LinkedHashSet::class.java, libraryModuleNames.size)
-        libraryModuleNames.forEach { indexerModuleName ->
-            builder.addStatement("modules.add(new \$T())", elementUtils.getTypeElement(indexerModuleName))
+        libraryModuleNames.forEach { libraryModuleName ->
+            builder.addStatement("modules.add(new \$T())", elementUtils.getTypeElement(libraryModuleName))
         }
         builder.addStatement("return modules")
         return builder.build()
