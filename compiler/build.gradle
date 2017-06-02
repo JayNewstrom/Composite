@@ -6,8 +6,7 @@ dependencies {
     compile project(':runtime')
 
     testCompile 'junit:junit:4.12'
-    testCompile 'org.assertj:assertj-core:1.7.1'
-    testCompile 'com.google.testing.compile:compile-testing:0.9'
+    testCompile 'com.google.testing.compile:compile-testing:0.11'
     testCompile files(org.gradle.internal.jvm.Jvm.current().getToolsJar())
 }
 
@@ -15,5 +14,5 @@ apply from: rootProject.file('publish.gradle')
 
 apply plugin: 'org.jlleitschuh.gradle.ktlint'
 ktlint {
-    version = '0.8.1'
+    version = ktlintVersion
 }
