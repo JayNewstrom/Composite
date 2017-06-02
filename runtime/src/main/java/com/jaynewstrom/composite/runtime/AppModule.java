@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.SOURCE)
 public @interface AppModule {
     // The fully qualified type name the app module should generate.
-    String value();
+    String[] value();
 
     boolean single() default false;
 

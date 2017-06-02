@@ -135,21 +135,25 @@ class CompositeProcessor : AbstractProcessor() {
         appModules.forEach { appModule ->
             val appModuleAnnotation = appModule.getAnnotation(AppModule::class.java)
             val excludedLibraryModuleNames = appModuleAnnotation.excludes.toSet()
-            val libraryModuleNames = typeToLibraryModulesMap.getOrDefault(appModuleAnnotation.value, mutableSetOf())
-            val filteredLibraryModuleNames = libraryModuleNames.filter { it !in excludedLibraryModuleNames }
-            generateAppModule(appModule, appModuleAnnotation, filteredLibraryModuleNames)
+            appModuleAnnotation.value.forEach { contributingToTypeName ->
+                val contributingToClassName = ClassName.get(elementUtils.getTypeElement(contributingToTypeName))
+                val libraryModuleNames = typeToLibraryModulesMap.getOrDefault(contributingToTypeName, mutableSetOf())
+                val filteredLibraryModuleNames = libraryModuleNames.filter { it !in excludedLibraryModuleNames }
+                generateAppModule(appModule, contributingToClassName, appModuleAnnotation, filteredLibraryModuleNames)
+            }
         }
         appModules.clear()
     }
 
-    private fun generateAppModule(appModuleElement: Element, appModuleAnnotation: AppModule, libraryModuleNames: List<String>) {
-        val contributingToClassName = ClassName.get(elementUtils.getTypeElement(appModuleAnnotation.value))
+    private fun generateAppModule(appModuleElement: Element, contributingToClassName: ClassName, appModuleAnnotation: AppModule,
+            libraryModuleNames: List<String>) {
         val builder = TypeSpec.classBuilder("Generated${contributingToClassName.simpleName()}Module")
                 .addModifiers(Modifier.FINAL)
 
         if (appModuleAnnotation.single) {
             if (libraryModuleNames.size != 1) {
-                error(appModuleElement, "Library modules included must be exactly one.\nActual library modules included are: %s", libraryModuleNames)
+                error(appModuleElement, "Library modules included must be exactly one.\nActual library modules included are: %s",
+                        libraryModuleNames)
                 return
             }
             builder.addMethod(moduleMethod(contributingToClassName, libraryModuleNames))
