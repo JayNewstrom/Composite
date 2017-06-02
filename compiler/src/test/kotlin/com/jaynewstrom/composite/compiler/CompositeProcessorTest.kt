@@ -6,9 +6,8 @@ import com.google.testing.compile.JavaSourcesSubjectFactory.javaSources
 import org.junit.Test
 import java.util.Arrays
 
-// Simple unit tests to make debugging in the IDE easier, full testing provided by integration tests.
 class CompositeProcessorTest {
-    @Test fun testProcessor() {
+    @Test fun testMultipleAppModules() {
         val runnableLibraryModule = JavaFileObjects.forSourceString("com.example.FooRunnable", """
                 |package com.example;
                 |import com.jaynewstrom.composite.runtime.LibraryModule;
@@ -113,5 +112,69 @@ class CompositeProcessorTest {
                 .and()
                 .generatesSources(expectedRunnableIndexer, expectedGeneratedRunnableModule, expectedTestRegistrableIndexer,
                         expectedGeneratedTestRegistrableModule)
+    }
+
+    @Test fun testExcludes() {
+        val fooRunnableModule = JavaFileObjects.forSourceString("com.example.FooRunnable", """
+                |package com.example;
+                |import com.jaynewstrom.composite.runtime.LibraryModule;
+                |@LibraryModule("java.lang.Runnable")
+                |public final class FooRunnable implements Runnable {
+                |    @Override public void run() {
+                |    }
+                |}
+                |""".trimMargin())
+
+        val barRunnableModule = JavaFileObjects.forSourceString("com.example.BarRunnable", """
+                |package com.example;
+                |import com.jaynewstrom.composite.runtime.LibraryModule;
+                |@LibraryModule("java.lang.Runnable")
+                |public final class BarRunnable implements Runnable {
+                |    @Override public void run() {
+                |    }
+                |}
+                |""".trimMargin())
+
+        val runnableAppModule = JavaFileObjects.forSourceString("com.example.RunnableAppModule", """
+                |package com.example;
+                |import com.jaynewstrom.composite.runtime.AppModule;
+                |@AppModule(value = "java.lang.Runnable", excludes = "com.example.BarRunnable")
+                |public final class RunnableAppModule {
+                |}
+                |""".trimMargin())
+
+        val expectedRunnableIndexer = JavaFileObjects.forSourceString(
+                "com.jaynewstrom.composite.generated.LibraryModuleIndexer_com_example_FooRunnable", """
+                |package com.jaynewstrom.composite.generated;
+                |
+                |import com.jaynewstrom.composite.runtime.LibraryModuleIndexer;
+                |
+                |@LibraryModuleIndexer(value = "java.lang.Runnable", libraryModule = "com.example.FooRunnable")
+                |public final class LibraryModuleIndexer_com_example_FooRunnable {
+                |}
+                |""".trimMargin())
+
+        val expectedGeneratedRunnableModule = JavaFileObjects.forSourceLines("com.example.GeneratedRunnableModule", """
+                |package com.example;
+                |
+                |import java.lang.Runnable;
+                |import java.util.LinkedHashSet;
+                |import java.util.Set;
+                |
+                |final class GeneratedRunnableModule {
+                |  Set<Runnable> modules() {
+                |    Set<Runnable> modules = new LinkedHashSet<>(1);
+                |    modules.add(new FooRunnable());
+                |    return modules;
+                |  }
+                |}
+                |""".trimMargin())
+
+        assertAbout(javaSources())
+                .that(Arrays.asList(fooRunnableModule, barRunnableModule, runnableAppModule))
+                .processedWith(CompositeProcessor())
+                .compilesWithoutError()
+                .and()
+                .generatesSources(expectedRunnableIndexer, expectedGeneratedRunnableModule)
     }
 }
