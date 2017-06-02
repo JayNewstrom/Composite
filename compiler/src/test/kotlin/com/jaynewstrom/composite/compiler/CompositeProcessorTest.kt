@@ -177,4 +177,54 @@ class CompositeProcessorTest {
                 .and()
                 .generatesSources(expectedRunnableIndexer, expectedGeneratedRunnableModule)
     }
+
+    @Test fun testSingle() {
+        val fooRunnableModule = JavaFileObjects.forSourceString("com.example.FooRunnable", """
+                |package com.example;
+                |import com.jaynewstrom.composite.runtime.LibraryModule;
+                |@LibraryModule("java.lang.Runnable")
+                |public final class FooRunnable implements Runnable {
+                |    @Override public void run() {
+                |    }
+                |}
+                |""".trimMargin())
+
+        val runnableAppModule = JavaFileObjects.forSourceString("com.example.RunnableAppModule", """
+                |package com.example;
+                |import com.jaynewstrom.composite.runtime.AppModule;
+                |@AppModule(value = "java.lang.Runnable", single = true)
+                |public final class RunnableAppModule {
+                |}
+                |""".trimMargin())
+
+        val expectedRunnableIndexer = JavaFileObjects.forSourceString(
+                "com.jaynewstrom.composite.generated.LibraryModuleIndexer_com_example_FooRunnable", """
+                |package com.jaynewstrom.composite.generated;
+                |
+                |import com.jaynewstrom.composite.runtime.LibraryModuleIndexer;
+                |
+                |@LibraryModuleIndexer(value = "java.lang.Runnable", libraryModule = "com.example.FooRunnable")
+                |public final class LibraryModuleIndexer_com_example_FooRunnable {
+                |}
+                |""".trimMargin())
+
+        val expectedGeneratedRunnableModule = JavaFileObjects.forSourceLines("com.example.GeneratedRunnableModule", """
+                |package com.example;
+                |
+                |import java.lang.Runnable;
+                |
+                |final class GeneratedRunnableModule {
+                |  Runnable module() {
+                |    return new FooRunnable();
+                |  }
+                |}
+                |""".trimMargin())
+
+        assertAbout(javaSources())
+                .that(Arrays.asList(fooRunnableModule, runnableAppModule))
+                .processedWith(CompositeProcessor())
+                .compilesWithoutError()
+                .and()
+                .generatesSources(expectedRunnableIndexer, expectedGeneratedRunnableModule)
+    }
 }

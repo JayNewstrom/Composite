@@ -11,6 +11,8 @@ public @interface AppModule {
     // The fully qualified type name the app module should generate.
     String value();
 
+    boolean single() default false;
+
     // The fully qualified type names of the library modules the app module should exclude.
     String[] excludes() default {};
 }
