@@ -122,29 +122,31 @@ class CompositeProcessor : AbstractProcessor() {
     }
 
     private fun processAppModules() {
-        val typeToIndexersMap = mutableMapOf<String, MutableSet<String>>()
+        val typeToLibraryModulesMap = mutableMapOf<String, MutableSet<String>>()
         val indexerPackage: PackageElement? = elementUtils.getPackageElement(GENERATED_INDEXER_PACKAGE_NAME)
         indexerPackage?.enclosedElements?.forEach { indexerElement ->
             val indexerAnnotation = indexerElement.getAnnotation(LibraryModuleIndexer::class.java)
-            if (typeToIndexersMap.containsKey(indexerAnnotation.value)) {
-                typeToIndexersMap[indexerAnnotation.value]!!.add(indexerAnnotation.libraryModule)
+            if (typeToLibraryModulesMap.containsKey(indexerAnnotation.value)) {
+                typeToLibraryModulesMap[indexerAnnotation.value]!!.add(indexerAnnotation.libraryModule)
             } else {
-                typeToIndexersMap.put(indexerAnnotation.value, mutableSetOf(indexerAnnotation.libraryModule))
+                typeToLibraryModulesMap.put(indexerAnnotation.value, mutableSetOf(indexerAnnotation.libraryModule))
             }
         }
         appModules.forEach { appModule ->
             val appModuleAnnotation = appModule.getAnnotation(AppModule::class.java)
-            val indexerModuleNames = typeToIndexersMap.getOrDefault(appModuleAnnotation.value, mutableSetOf())
-            generateAppModule(appModule, appModuleAnnotation, indexerModuleNames)
+            val excludedLibraryModuleNames = appModuleAnnotation.excludes.toSet()
+            val libraryModuleNames = typeToLibraryModulesMap.getOrDefault(appModuleAnnotation.value, mutableSetOf())
+            val filteredLibraryModuleNames = libraryModuleNames.filter { it !in excludedLibraryModuleNames }
+            generateAppModule(appModule, appModuleAnnotation, filteredLibraryModuleNames)
         }
         appModules.clear()
     }
 
-    private fun generateAppModule(appModuleElement: Element, appModuleAnnotation: AppModule, indexerModuleNames: Set<String>) {
+    private fun generateAppModule(appModuleElement: Element, appModuleAnnotation: AppModule, libraryModuleNames: List<String>) {
         val contributingToClassName = ClassName.get(elementUtils.getTypeElement(appModuleAnnotation.value))
         val builder = TypeSpec.classBuilder("Generated${contributingToClassName.simpleName()}Module")
                 .addModifiers(Modifier.FINAL)
-                .addMethod(modulesMethod(contributingToClassName, indexerModuleNames))
+                .addMethod(modulesMethod(contributingToClassName, libraryModuleNames))
         val appModuleClassName = ClassName.get(appModuleElement.asType()) as ClassName
         val file = JavaFile.builder(appModuleClassName.packageName(), builder.build()).build()
         try {
@@ -154,12 +156,12 @@ class CompositeProcessor : AbstractProcessor() {
         }
     }
 
-    private fun modulesMethod(contributingToClassName: ClassName, indexerModuleNames: Set<String>): MethodSpec {
+    private fun modulesMethod(contributingToClassName: ClassName, libraryModuleNames: List<String>): MethodSpec {
         val builder = MethodSpec.methodBuilder("modules")
                 .returns(ParameterizedTypeName.get(ClassName.get(Set::class.java), contributingToClassName))
         builder.addStatement("\$T<\$T> modules = new \$T<>(\$L)",
-                Set::class.java, contributingToClassName, LinkedHashSet::class.java, indexerModuleNames.size)
-        indexerModuleNames.forEach { indexerModuleName ->
+                Set::class.java, contributingToClassName, LinkedHashSet::class.java, libraryModuleNames.size)
+        libraryModuleNames.forEach { indexerModuleName ->
             builder.addStatement("modules.add(new \$T())", elementUtils.getTypeElement(indexerModuleName))
         }
         builder.addStatement("return modules")
