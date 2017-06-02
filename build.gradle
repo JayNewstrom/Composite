@@ -1,6 +1,7 @@
 subprojects {
     buildscript {
         ext.kotlinVersion = '1.1.2'
+        ext.ktlintVersion = '0.8.1'
 
         repositories {
             mavenCentral()
