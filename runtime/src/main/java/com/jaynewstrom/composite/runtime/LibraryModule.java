@@ -8,6 +8,8 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.SOURCE)
 public @interface LibraryModule {
-    // The fully qualified type name the library module is contributing to.
+    /**
+     * The fully qualified type name of the contributingToType.
+     */
     String value();
 }

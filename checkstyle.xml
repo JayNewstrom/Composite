@@ -61,7 +61,7 @@
             <property name="sortStaticImportsAlphabetically" value="true"/>
         </module>
         <module name="LineLength">
-            <property name="max" value="120"/>
+            <property name="max" value="135"/>
         </module>
         <module name="GenericWhitespace"/>
         <module name="EmptyForIteratorPad"/>
