@@ -73,6 +73,10 @@ class CompositeProcessor : AbstractProcessor() {
             val libraryModuleType = element.asType()
             val annotation = element.getAnnotation(LibraryModule::class.java)
             val contributingToElement = elementUtils.getTypeElement(annotation.value)
+            if (contributingToElement == null) {
+                error(element, "contributingToType does not exist.")
+                return false
+            }
             val contributingToType = contributingToElement.asType()
             if (!typeUtils.isAssignable(libraryModuleType, contributingToType)) {
                 error(element, "libraryModule must be of type contributingToType")
@@ -116,6 +120,13 @@ class CompositeProcessor : AbstractProcessor() {
             if (element.kind !== ElementKind.CLASS) {
                 error(element, "%s annotations can only be applied to classes!", AppModule::class.java.simpleName)
                 return
+            }
+            val appModuleAnnotation = element.getAnnotation(AppModule::class.java)
+            appModuleAnnotation.value.forEach { contributingToTypeName ->
+                if (elementUtils.getTypeElement(contributingToTypeName) == null) {
+                    error(element, "contributingToType: %s does not exist", contributingToTypeName)
+                    return
+                }
             }
             appModules.add(element)
         }
