@@ -5,11 +5,19 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * Should only be used by generated code.
+ */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.CLASS)
 public @interface LibraryModuleIndexer {
-    // The fully qualified type name the library module is contributing to.
+    /**
+     * The fully qualified type name for the contributingToType of the library module.
+     */
     String value();
 
+    /**
+     * The fully qualified type name of the library module.
+     */
     String libraryModule();
 }
