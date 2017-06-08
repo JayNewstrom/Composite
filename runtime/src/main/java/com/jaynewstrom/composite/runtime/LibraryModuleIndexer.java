@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
  * Should only be used by generated code.
  */
 @Target(ElementType.TYPE)
-@Retention(RetentionPolicy.CLASS)
+@Retention(RetentionPolicy.RUNTIME)
 public @interface LibraryModuleIndexer {
     /**
      * The fully qualified type name for the contributingToType of the library module.
