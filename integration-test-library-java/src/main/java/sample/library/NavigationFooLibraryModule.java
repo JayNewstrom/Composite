@@ -2,6 +2,6 @@ package sample.library;
 
 import com.jaynewstrom.composite.runtime.LibraryModule;
 
-@LibraryModule("sample.library.NavigationRegistrable")
+@LibraryModule(NavigationRegistrable.class)
 public final class NavigationFooLibraryModule implements NavigationRegistrable {
 }

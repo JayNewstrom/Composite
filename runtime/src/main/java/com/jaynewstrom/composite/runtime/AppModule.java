@@ -9,9 +9,9 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.SOURCE)
 public @interface AppModule {
     /**
-     * The fully qualified type names of the contributingToTypes the app module should generate.
+     * The contributingToTypes the app module should generate.
      */
-    String[] value();
+    Class<?>[] value();
 
     /**
      * Whether the generated module should only include a single module of the contributingToTypes, checked at compile time.

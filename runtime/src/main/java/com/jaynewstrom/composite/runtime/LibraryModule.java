@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.SOURCE)
 public @interface LibraryModule {
     /**
-     * The fully qualified type name of the contributingToType.
+     * The contributingToType.
      */
-    String value();
+    Class<?> value();
 }
