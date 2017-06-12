@@ -2,6 +2,8 @@ package sample.app;
 
 import com.jaynewstrom.composite.runtime.AppModule;
 
-@AppModule("sample.library.NavigationRegistrable")
+import sample.library.NavigationRegistrable;
+
+@AppModule(NavigationRegistrable.class)
 final class NavigationRegistrableAppModule {
 }

@@ -11,7 +11,8 @@ class CompositeProcessorTest {
         val runnableLibraryModule = JavaFileObjects.forSourceString("com.example.FooRunnable", """
                 |package com.example;
                 |import com.jaynewstrom.composite.runtime.LibraryModule;
-                |@LibraryModule("java.lang.Runnable")
+                |import java.lang.Runnable;
+                |@LibraryModule(Runnable.class)
                 |public final class FooRunnable implements Runnable {
                 |    @Override public void run() {
                 |    }
@@ -21,7 +22,8 @@ class CompositeProcessorTest {
         val runnableAppModule = JavaFileObjects.forSourceString("com.example.RunnableAppModule", """
                 |package com.example;
                 |import com.jaynewstrom.composite.runtime.AppModule;
-                |@AppModule("java.lang.Runnable")
+                |import java.lang.Runnable;
+                |@AppModule(Runnable.class)
                 |public final class RunnableAppModule {
                 |}
                 |""".trimMargin())
@@ -63,7 +65,7 @@ class CompositeProcessorTest {
         val testRegistrableLibraryModule = JavaFileObjects.forSourceString("example.TestRegistrableLibraryModule", """
                 |package example;
                 |import com.jaynewstrom.composite.runtime.LibraryModule;
-                |@LibraryModule("example.TestRegistrable")
+                |@LibraryModule(TestRegistrable.class)
                 |public final class TestRegistrableLibraryModule implements TestRegistrable {
                 |    @Override public void test() {
                 |    }
@@ -73,7 +75,7 @@ class CompositeProcessorTest {
         val testRegistrableAppModule = JavaFileObjects.forSourceString("example.TestRegistrableAppModule", """
                 |package example;
                 |import com.jaynewstrom.composite.runtime.AppModule;
-                |@AppModule("example.TestRegistrable")
+                |@AppModule(TestRegistrable.class)
                 |public final class TestRegistrableAppModule {
                 |}
                 |""".trimMargin())
@@ -118,7 +120,8 @@ class CompositeProcessorTest {
         val fooRunnableModule = JavaFileObjects.forSourceString("com.example.FooRunnable", """
                 |package com.example;
                 |import com.jaynewstrom.composite.runtime.LibraryModule;
-                |@LibraryModule("java.lang.Runnable")
+                |import java.lang.Runnable;
+                |@LibraryModule(Runnable.class)
                 |public final class FooRunnable implements Runnable {
                 |    @Override public void run() {
                 |    }
@@ -128,7 +131,8 @@ class CompositeProcessorTest {
         val barRunnableModule = JavaFileObjects.forSourceString("com.example.BarRunnable", """
                 |package com.example;
                 |import com.jaynewstrom.composite.runtime.LibraryModule;
-                |@LibraryModule("java.lang.Runnable")
+                |import java.lang.Runnable;
+                |@LibraryModule(Runnable.class)
                 |public final class BarRunnable implements Runnable {
                 |    @Override public void run() {
                 |    }
@@ -138,7 +142,8 @@ class CompositeProcessorTest {
         val runnableAppModule = JavaFileObjects.forSourceString("com.example.RunnableAppModule", """
                 |package com.example;
                 |import com.jaynewstrom.composite.runtime.AppModule;
-                |@AppModule(value = "java.lang.Runnable", excludes = "com.example.BarRunnable")
+                |import java.lang.Runnable;
+                |@AppModule(value = Runnable.class, excludes = "com.example.BarRunnable")
                 |public final class RunnableAppModule {
                 |}
                 |""".trimMargin())
@@ -182,7 +187,8 @@ class CompositeProcessorTest {
         val fooRunnableModule = JavaFileObjects.forSourceString("com.example.FooRunnable", """
                 |package com.example;
                 |import com.jaynewstrom.composite.runtime.LibraryModule;
-                |@LibraryModule("java.lang.Runnable")
+                |import java.lang.Runnable;
+                |@LibraryModule(Runnable.class)
                 |public final class FooRunnable implements Runnable {
                 |    @Override public void run() {
                 |    }
@@ -192,7 +198,8 @@ class CompositeProcessorTest {
         val runnableAppModule = JavaFileObjects.forSourceString("com.example.RunnableAppModule", """
                 |package com.example;
                 |import com.jaynewstrom.composite.runtime.AppModule;
-                |@AppModule(value = "java.lang.Runnable", single = true)
+                |import java.lang.Runnable;
+                |@AppModule(value = Runnable.class, single = true)
                 |public final class RunnableAppModule {
                 |}
                 |""".trimMargin())
@@ -232,7 +239,7 @@ class CompositeProcessorTest {
         val runnableLibraryModule = JavaFileObjects.forSourceString("com.example.FooRunnable", """
                 |package com.example;
                 |import com.jaynewstrom.composite.runtime.LibraryModule;
-                |@LibraryModule("java.lang.Runnable")
+                |@LibraryModule(Runnable.class)
                 |public final class FooRunnable implements Runnable {
                 |    @Override public void run() {
                 |    }
@@ -277,7 +284,7 @@ class CompositeProcessorTest {
         val testRegistrableLibraryModule = JavaFileObjects.forSourceString("example.TestRegistrableLibraryModule", """
                 |package example;
                 |import com.jaynewstrom.composite.runtime.LibraryModule;
-                |@LibraryModule("example.TestRegistrable")
+                |@LibraryModule(TestRegistrable.class)
                 |public final class TestRegistrableLibraryModule implements TestRegistrable {
                 |    @Override public void test() {
                 |    }
@@ -315,7 +322,9 @@ class CompositeProcessorTest {
         val appModule = JavaFileObjects.forSourceString("foo.example.RunnableAppModule", """
                 |package foo.example;
                 |import com.jaynewstrom.composite.runtime.AppModule;
-                |@AppModule({"java.lang.Runnable", "example.TestRegistrable"})
+                |import java.lang.Runnable;
+                |import example.TestRegistrable;
+                |@AppModule({Runnable.class, TestRegistrable.class})
                 |public final class RunnableAppModule {
                 |}
                 |""".trimMargin())

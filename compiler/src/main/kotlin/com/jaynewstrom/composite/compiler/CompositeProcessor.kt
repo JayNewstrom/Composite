@@ -21,6 +21,7 @@ import javax.lang.model.element.ElementKind
 import javax.lang.model.element.Modifier
 import javax.lang.model.element.PackageElement
 import javax.lang.model.element.TypeElement
+import javax.lang.model.type.TypeMirror
 import javax.lang.model.util.Elements
 import javax.lang.model.util.Types
 import javax.tools.Diagnostic
@@ -71,12 +72,13 @@ class CompositeProcessor : AbstractProcessor() {
                 return false
             }
             val libraryModuleType = element.asType()
-            val annotation = element.getAnnotation(LibraryModule::class.java)
-            val contributingToElement = elementUtils.getTypeElement(annotation.value)
-            if (contributingToElement == null) {
-                error(element, "contributingToType does not exist.")
+            val annotation = Util.getAnnotation(LibraryModule::class.java, element)
+            val value = annotation["value"]
+            if (value !is TypeMirror) {
+                error(element, "value must be an instance of a TypeMirror")
                 return false
             }
+            val contributingToElement = typeUtils.asElement(value)
             val contributingToType = contributingToElement.asType()
             if (!typeUtils.isAssignable(libraryModuleType, contributingToType)) {
                 error(element, "libraryModule must be of type contributingToType")
@@ -121,13 +123,6 @@ class CompositeProcessor : AbstractProcessor() {
                 error(element, "%s annotations can only be applied to classes!", AppModule::class.java.simpleName)
                 return
             }
-            val appModuleAnnotation = element.getAnnotation(AppModule::class.java)
-            appModuleAnnotation.value.forEach { contributingToTypeName ->
-                if (elementUtils.getTypeElement(contributingToTypeName) == null) {
-                    error(element, "contributingToType: %s does not exist", contributingToTypeName)
-                    return
-                }
-            }
             appModules.add(element)
         }
     }
@@ -144,11 +139,25 @@ class CompositeProcessor : AbstractProcessor() {
             }
         }
         appModules.forEach { appModule ->
+            val annotation = Util.getAnnotation(AppModule::class.java, appModule)
             val appModuleAnnotation = appModule.getAnnotation(AppModule::class.java)
             val excludedLibraryModuleNames = appModuleAnnotation.excludes.toSet()
-            appModuleAnnotation.value.forEach { contributingToTypeName ->
-                val contributingToClassName = ClassName.get(elementUtils.getTypeElement(contributingToTypeName))
-                val libraryModuleNames = typeToLibraryModulesMap.getOrDefault(contributingToTypeName, mutableSetOf())
+            val annotationValue = annotation["value"]
+            if (annotationValue !is Array<*>) {
+                error(appModule, "AppModule#value() is not an array")
+                return
+            }
+            annotationValue.forEach { contributingToClass ->
+                if (contributingToClass !is TypeMirror) {
+                    error(appModule, "All values must be a TypeMirror, including: s", contributingToClass.toString())
+                    return
+                }
+                val contributingToClassName = ClassName.get(contributingToClass)
+                if (contributingToClassName !is ClassName) {
+                    error(appModule, "contributingToType must be a ClassName")
+                    return
+                }
+                val libraryModuleNames = typeToLibraryModulesMap.getOrDefault(contributingToClassName.reflectionName(), mutableSetOf())
                 val filteredLibraryModuleNames = libraryModuleNames.filter { it !in excludedLibraryModuleNames }
                 generateAppModule(appModule, contributingToClassName, appModuleAnnotation, filteredLibraryModuleNames)
             }

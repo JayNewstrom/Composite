@@ -2,7 +2,7 @@ package sample.library
 
 import com.jaynewstrom.composite.runtime.LibraryModule
 
-@LibraryModule("sample.library.NavigationRegistrable")
+@LibraryModule(NavigationRegistrable::class)
 class NavigationFooLibraryModule : NavigationRegistrable {
     override fun name(): String {
         return "Foo"
