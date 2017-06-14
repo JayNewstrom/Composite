@@ -8,7 +8,7 @@ class NavigationFooLibraryModule : NavigationRegistrable {
         return "Foo"
     }
 
-    override fun action(): Runnable {
-        return Runnable { System.out.println("Foo!") }
+    override fun action(): () -> Unit {
+        return { System.out.println("Foo!") }
     }
 }
