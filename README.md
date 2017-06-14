@@ -6,7 +6,7 @@ automatic compositing of them in an app project.
 
 Defined in messages gradle module:
 ```java
-@LibraryModule("com.example.NavigationRegistrable")
+@LibraryModule(NavigationRegistrable.class)
 public final class MessagesNavigationRegistrable implements NavigationRegistrable {
     @Override public String menuType() {
         return "Messages";
@@ -21,7 +21,7 @@ public final class MessagesNavigationRegistrable implements NavigationRegistrabl
 Defined in app gradle module:
 ```java
 // Triggers the annotation processor to generate the composite of all NavigationRegistrable library modules.
-@AppModule("com.example.NavigationRegistrable")
+@AppModule(NavigationRegistrable.class)
 final class AppNavigationRegistrable {
 }
 ```
