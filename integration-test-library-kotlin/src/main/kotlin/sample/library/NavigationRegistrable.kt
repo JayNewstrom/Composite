@@ -2,5 +2,5 @@ package sample.library
 
 interface NavigationRegistrable {
     fun name(): String
-    fun action(): Runnable
+    fun action(): () -> Unit
 }
