@@ -11,8 +11,3 @@ dependencies {
 }
 
 apply from: rootProject.file('publish.gradle')
-
-apply plugin: 'org.jlleitschuh.gradle.ktlint'
-ktlint {
-    version = ktlintVersion
-}
