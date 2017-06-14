@@ -42,12 +42,17 @@ class CompositeProcessorTest {
         val expectedGeneratedRunnableModule = JavaFileObjects.forSourceLines("com.example.GeneratedRunnableModule", """
                 |package com.example;
                 |
+                |import java.lang.AssertionError;
                 |import java.lang.Runnable;
                 |import java.util.LinkedHashSet;
                 |import java.util.Set;
                 |
                 |final class GeneratedRunnableModule {
-                |  Set<Runnable> modules() {
+                |  private GeneratedRunnableModule() {
+                |    throw new AssertionError("No instances.");
+                |  }
+                |
+                |  static Set<Runnable> modules() {
                 |    Set<Runnable> modules = new LinkedHashSet<>(1);
                 |    modules.add(new FooRunnable());
                 |    return modules;
@@ -94,11 +99,16 @@ class CompositeProcessorTest {
         val expectedGeneratedTestRegistrableModule = JavaFileObjects.forSourceLines("example.GeneratedTestRegistrableModule", """
                 |package example;
                 |
+                |import java.lang.AssertionError;
                 |import java.util.LinkedHashSet;
                 |import java.util.Set;
                 |
                 |final class GeneratedTestRegistrableModule {
-                |  Set<TestRegistrable> modules() {
+                |  private GeneratedRunnableModule() {
+                |    throw new AssertionError("No instances.");
+                |  }
+                |
+                |  static Set<TestRegistrable> modules() {
                 |    Set<TestRegistrable> modules = new LinkedHashSet<>(1);
                 |    modules.add(new TestRegistrableLibraryModule());
                 |    return modules;
@@ -162,12 +172,17 @@ class CompositeProcessorTest {
         val expectedGeneratedRunnableModule = JavaFileObjects.forSourceLines("com.example.GeneratedRunnableModule", """
                 |package com.example;
                 |
+                |import java.lang.AssertionError;
                 |import java.lang.Runnable;
                 |import java.util.LinkedHashSet;
                 |import java.util.Set;
                 |
                 |final class GeneratedRunnableModule {
-                |  Set<Runnable> modules() {
+                |  private GeneratedRunnableModule() {
+                |    throw new AssertionError("No instances.");
+                |  }
+                |
+                |  static Set<Runnable> modules() {
                 |    Set<Runnable> modules = new LinkedHashSet<>(1);
                 |    modules.add(new FooRunnable());
                 |    return modules;
@@ -218,10 +233,15 @@ class CompositeProcessorTest {
         val expectedGeneratedRunnableModule = JavaFileObjects.forSourceLines("com.example.GeneratedRunnableModule", """
                 |package com.example;
                 |
+                |import java.lang.AssertionError;
                 |import java.lang.Runnable;
                 |
                 |final class GeneratedRunnableModule {
-                |  Runnable module() {
+                |  private GeneratedRunnableModule() {
+                |    throw new AssertionError("No instances.");
+                |  }
+                |
+                |  static Runnable module() {
                 |    return new FooRunnable();
                 |  }
                 |}
@@ -261,12 +281,17 @@ class CompositeProcessorTest {
                 |package foo.example;
                 |
                 |import com.example.FooRunnable;
+                |import java.lang.AssertionError;
                 |import java.lang.Runnable;
                 |import java.util.LinkedHashSet;
                 |import java.util.Set;
                 |
                 |final class GeneratedRunnableModule {
-                |  Set<Runnable> modules() {
+                |  private GeneratedRunnableModule() {
+                |    throw new AssertionError("No instances.");
+                |  }
+                |
+                |  static Set<Runnable> modules() {
                 |    Set<Runnable> modules = new LinkedHashSet<>(1);
                 |    modules.add(new FooRunnable());
                 |    return modules;
@@ -307,11 +332,16 @@ class CompositeProcessorTest {
                 |
                 |import example.TestRegistrable;
                 |import example.TestRegistrableLibraryModule;
+                |import java.lang.AssertionError;
                 |import java.util.LinkedHashSet;
                 |import java.util.Set;
                 |
                 |final class GeneratedTestRegistrableModule {
-                |  Set<TestRegistrable> modules() {
+                |  private GeneratedRunnableModule() {
+                |    throw new AssertionError("No instances.");
+                |  }
+                |
+                |  static Set<TestRegistrable> modules() {
                 |    Set<TestRegistrable> modules = new LinkedHashSet<>(1);
                 |    modules.add(new TestRegistrableLibraryModule());
                 |    return modules;

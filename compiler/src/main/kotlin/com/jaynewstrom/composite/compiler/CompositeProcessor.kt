@@ -169,6 +169,7 @@ class CompositeProcessor : AbstractProcessor() {
             libraryModuleNames: List<String>) {
         val builder = TypeSpec.classBuilder("Generated${contributingToClassName.simpleName()}Module")
                 .addModifiers(Modifier.FINAL)
+        builder.addMethod(appModuleConstructor())
 
         if (appModuleAnnotation.single) {
             if (libraryModuleNames.size != 1) {
@@ -190,8 +191,16 @@ class CompositeProcessor : AbstractProcessor() {
         }
     }
 
+    private fun appModuleConstructor(): MethodSpec {
+        val builder = MethodSpec.constructorBuilder()
+        builder.addModifiers(Modifier.PRIVATE)
+        builder.addStatement("throw new \$T(\"No instances.\")", AssertionError::class.java)
+        return builder.build()
+    }
+
     private fun moduleMethod(contributingToClassName: ClassName, libraryModuleNames: List<String>): MethodSpec {
         val builder = MethodSpec.methodBuilder("module").returns(contributingToClassName)
+        builder.addModifiers(Modifier.STATIC)
         builder.addStatement("return new \$T()", elementUtils.getTypeElement(libraryModuleNames[0]))
         return builder.build()
     }
@@ -199,6 +208,7 @@ class CompositeProcessor : AbstractProcessor() {
     private fun modulesMethod(contributingToClassName: ClassName, libraryModuleNames: List<String>): MethodSpec {
         val builder = MethodSpec.methodBuilder("modules")
                 .returns(ParameterizedTypeName.get(ClassName.get(Set::class.java), contributingToClassName))
+        builder.addModifiers(Modifier.STATIC)
         builder.addStatement("\$T<\$T> modules = new \$T<>(\$L)",
                 Set::class.java, contributingToClassName, LinkedHashSet::class.java, libraryModuleNames.size)
         libraryModuleNames.forEach { libraryModuleName ->
