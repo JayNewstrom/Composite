@@ -8,4 +8,5 @@ dependencies {
     implementation project(':runtime')
     implementation project(':integration-test-library-java')
     apt project(':compiler')
+    implementation project(':reflection')
 }
