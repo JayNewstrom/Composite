@@ -2,7 +2,7 @@ apply plugin: 'kotlin'
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
-    compile 'com.squareup:javapoet:1.9.0'
+    compile 'com.squareup:javapoet:1.11.1'
     compile project(':runtime')
 
     testCompile 'junit:junit:4.12'
