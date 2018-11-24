@@ -1,6 +1,6 @@
 subprojects {
     buildscript {
-        ext.kotlinVersion = '1.1.2-5'
+        ext.kotlinVersion = '1.3.10'
         ext.ktlintVersion = '0.8.1'
 
         repositories {
@@ -9,7 +9,7 @@ subprojects {
             maven { url "https://plugins.gradle.org/m2/" }
         }
         dependencies {
-            classpath 'com.android.tools.build:gradle:2.3.3'
+            classpath 'com.android.tools.build:gradle:3.2.1'
             classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
             classpath 'net.ltgt.gradle:gradle-apt-plugin:0.10'
             classpath 'com.github.dcendents:android-maven-gradle-plugin:1.4.1'
@@ -28,7 +28,7 @@ subprojects {
     apply plugin: 'checkstyle'
 
     checkstyle {
-        toolVersion = '7.8'
+        toolVersion = '8.14'
         configFile rootProject.file('checkstyle.xml')
         showViolations true
         configProperties = ['checkstyle.cache.file': rootProject.file('build/checkstyle.cache')]
@@ -60,7 +60,7 @@ subprojects {
         project.tasks.create('ktlintFormat', JavaExec.class) {
             main = 'com.github.shyiko.ktlint.Main'
             classpath = project.configurations.ktlint
-            args '-r', 'src/**/*.kt'
+            args '-F', 'src/**/*.kt'
         }
     }
     project.plugins.withId('kotlin', configureKtlint)
