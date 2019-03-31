@@ -18,6 +18,7 @@ subprojects {
     repositories {
         mavenCentral()
         google()
+        jcenter()
     }
 
     group ARTIFACT_GROUP

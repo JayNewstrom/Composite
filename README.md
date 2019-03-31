@@ -34,8 +34,8 @@ Setup
 ------------
 ```groovy
 dependencies {
-    annotationProcessor 'com.jaynewstrom.composite:compiler:0.5.2'
-    implementation 'com.jaynewstrom.composite:runtime:0.5.2'
+    annotationProcessor 'com.jaynewstrom.composite:compiler:0.6.0'
+    implementation 'com.jaynewstrom.composite:runtime:0.6.0'
 }
 ```
 
