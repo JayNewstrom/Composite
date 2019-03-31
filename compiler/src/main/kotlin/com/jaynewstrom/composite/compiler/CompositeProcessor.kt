@@ -125,6 +125,10 @@ class CompositeAppProcessor : AbstractProcessor() {
             .addOriginatingElement(appModuleElement)
         builder.addMethod(appModuleConstructor())
 
+        val libraryModuleTypeElements = libraryModuleNames.map { elementUtils.getTypeElement(it) }
+
+        libraryModuleTypeElements.forEach { builder.addOriginatingElement(it) }
+
         if (appModuleAnnotation.single) {
             if (libraryModuleNames.size != 1) {
                 error(
@@ -134,9 +138,9 @@ class CompositeAppProcessor : AbstractProcessor() {
                 )
                 return
             }
-            builder.addMethod(moduleMethod(contributingToClassName, libraryModuleNames))
+            builder.addMethod(moduleMethod(contributingToClassName, libraryModuleTypeElements.first()))
         } else {
-            builder.addMethod(modulesMethod(contributingToClassName, libraryModuleNames))
+            builder.addMethod(modulesMethod(contributingToClassName, libraryModuleTypeElements))
         }
 
         val appModuleClassName = ClassName.get(appModuleElement.asType()) as ClassName
@@ -155,23 +159,23 @@ class CompositeAppProcessor : AbstractProcessor() {
         return builder.build()
     }
 
-    private fun moduleMethod(contributingToClassName: ClassName, libraryModuleNames: List<String>): MethodSpec {
+    private fun moduleMethod(contributingToClassName: ClassName, libraryModuleTypeElement: TypeElement): MethodSpec {
         val builder = MethodSpec.methodBuilder("module").returns(contributingToClassName)
         builder.addModifiers(Modifier.STATIC)
-        builder.addStatement("return new \$T()", elementUtils.getTypeElement(libraryModuleNames[0]))
+        builder.addStatement("return new \$T()", libraryModuleTypeElement)
         return builder.build()
     }
 
-    private fun modulesMethod(contributingToClassName: ClassName, libraryModuleNames: List<String>): MethodSpec {
+    private fun modulesMethod(contributingToClassName: ClassName, libraryModuleTypeElements: List<TypeElement>): MethodSpec {
         val builder = MethodSpec.methodBuilder("modules")
             .returns(ParameterizedTypeName.get(ClassName.get(Set::class.java), contributingToClassName))
         builder.addModifiers(Modifier.STATIC)
         builder.addStatement(
             "\$T<\$T> modules = new \$T<>(\$L)",
-            Set::class.java, contributingToClassName, LinkedHashSet::class.java, libraryModuleNames.size
+            Set::class.java, contributingToClassName, LinkedHashSet::class.java, libraryModuleTypeElements.size
         )
-        libraryModuleNames.forEach { libraryModuleName ->
-            builder.addStatement("modules.add(new \$T())", elementUtils.getTypeElement(libraryModuleName))
+        libraryModuleTypeElements.forEach { libraryModuleTypeElement ->
+            builder.addStatement("modules.add(new \$T())", libraryModuleTypeElement)
         }
         builder.addStatement("return modules")
         return builder.build()
