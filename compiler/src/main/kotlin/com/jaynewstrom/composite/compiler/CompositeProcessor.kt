@@ -26,18 +26,18 @@ import javax.lang.model.util.Elements
 import javax.lang.model.util.Types
 import javax.tools.Diagnostic
 
+private const val GENERATED_INDEXER_PACKAGE_NAME: String = "com.jaynewstrom.composite.generated"
+
 class CompositeProcessor : AbstractProcessor() {
-    private val GENERATED_INDEXER_PACKAGE_NAME: String = "com.jaynewstrom.composite.generated"
+    private val appModules = mutableSetOf<Element>()
 
-    val appModules = mutableSetOf<Element>()
-
-    val messager: Messager
+    private val messager: Messager
         get() = processingEnv.messager
-    val filer: Filer
+    private val filer: Filer
         get() = processingEnv.filer
-    val typeUtils: Types
+    private val typeUtils: Types
         get() = processingEnv.typeUtils
-    val elementUtils: Elements
+    private val elementUtils: Elements
         get() = processingEnv.elementUtils
 
     override fun getSupportedAnnotationTypes(): MutableSet<String> {
@@ -138,7 +138,7 @@ class CompositeProcessor : AbstractProcessor() {
             if (typeToLibraryModulesMap.containsKey(indexerAnnotation.value)) {
                 typeToLibraryModulesMap[indexerAnnotation.value]!!.add(indexerAnnotation.libraryModule)
             } else {
-                typeToLibraryModulesMap.put(indexerAnnotation.value, mutableSetOf(indexerAnnotation.libraryModule))
+                typeToLibraryModulesMap[indexerAnnotation.value] = mutableSetOf(indexerAnnotation.libraryModule)
             }
         }
         appModules.forEach { appModule ->
