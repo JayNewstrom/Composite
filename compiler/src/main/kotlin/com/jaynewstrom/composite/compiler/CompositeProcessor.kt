@@ -29,7 +29,7 @@ import javax.tools.Diagnostic
 class CompositeProcessor : AbstractProcessor() {
     private val GENERATED_INDEXER_PACKAGE_NAME: String = "com.jaynewstrom.composite.generated"
 
-    val appModules = mutableListOf<Element>()
+    val appModules = mutableSetOf<Element>()
 
     val messager: Messager
         get() = processingEnv.messager
@@ -105,6 +105,7 @@ class CompositeProcessor : AbstractProcessor() {
         }
         val builder = TypeSpec.classBuilder("LibraryModuleIndexer_" + libraryModuleType.reflectionName().replace('.', '_'))
             .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+            .addOriginatingElement(element)
             .addAnnotation(
                 AnnotationSpec.builder(ClassName.get(LibraryModuleIndexer::class.java))
                     .addMember("value", "\$S", contributingToType.reflectionName())
@@ -175,6 +176,7 @@ class CompositeProcessor : AbstractProcessor() {
     ) {
         val builder = TypeSpec.classBuilder("Generated${contributingToClassName.simpleName()}Module")
             .addModifiers(Modifier.FINAL)
+            .addOriginatingElement(appModuleElement)
         builder.addMethod(appModuleConstructor())
 
         if (appModuleAnnotation.single) {
