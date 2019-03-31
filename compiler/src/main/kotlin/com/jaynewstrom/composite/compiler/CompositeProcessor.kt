@@ -42,9 +42,9 @@ class CompositeProcessor : AbstractProcessor() {
 
     override fun getSupportedAnnotationTypes(): MutableSet<String> {
         return mutableSetOf(
-                AppModule::class.java.canonicalName,
-                LibraryModule::class.java.canonicalName,
-                LibraryModuleIndexer::class.java.canonicalName
+            AppModule::class.java.canonicalName,
+            LibraryModule::class.java.canonicalName,
+            LibraryModuleIndexer::class.java.canonicalName
         )
     }
 
@@ -104,11 +104,13 @@ class CompositeProcessor : AbstractProcessor() {
             return
         }
         val builder = TypeSpec.classBuilder("LibraryModuleIndexer_" + libraryModuleType.reflectionName().replace('.', '_'))
-                .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
-                .addAnnotation(AnnotationSpec.builder(ClassName.get(LibraryModuleIndexer::class.java))
-                        .addMember("value", "\$S", contributingToType.reflectionName())
-                        .addMember("libraryModule", "\$S", libraryModuleType.reflectionName())
-                        .build())
+            .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+            .addAnnotation(
+                AnnotationSpec.builder(ClassName.get(LibraryModuleIndexer::class.java))
+                    .addMember("value", "\$S", contributingToType.reflectionName())
+                    .addMember("libraryModule", "\$S", libraryModuleType.reflectionName())
+                    .build()
+            )
         val file = JavaFile.builder(GENERATED_INDEXER_PACKAGE_NAME, builder.build()).build()
         try {
             file.writeTo(filer)
@@ -165,16 +167,23 @@ class CompositeProcessor : AbstractProcessor() {
         appModules.clear()
     }
 
-    private fun generateAppModule(appModuleElement: Element, contributingToClassName: ClassName, appModuleAnnotation: AppModule,
-            libraryModuleNames: List<String>) {
+    private fun generateAppModule(
+        appModuleElement: Element,
+        contributingToClassName: ClassName,
+        appModuleAnnotation: AppModule,
+        libraryModuleNames: List<String>
+    ) {
         val builder = TypeSpec.classBuilder("Generated${contributingToClassName.simpleName()}Module")
-                .addModifiers(Modifier.FINAL)
+            .addModifiers(Modifier.FINAL)
         builder.addMethod(appModuleConstructor())
 
         if (appModuleAnnotation.single) {
             if (libraryModuleNames.size != 1) {
-                error(appModuleElement, "Library modules included must be exactly one.\nActual library modules included are: %s",
-                        libraryModuleNames)
+                error(
+                    appModuleElement,
+                    "Library modules included must be exactly one.\nActual library modules included are: %s",
+                    libraryModuleNames
+                )
                 return
             }
             builder.addMethod(moduleMethod(contributingToClassName, libraryModuleNames))
@@ -207,10 +216,12 @@ class CompositeProcessor : AbstractProcessor() {
 
     private fun modulesMethod(contributingToClassName: ClassName, libraryModuleNames: List<String>): MethodSpec {
         val builder = MethodSpec.methodBuilder("modules")
-                .returns(ParameterizedTypeName.get(ClassName.get(Set::class.java), contributingToClassName))
+            .returns(ParameterizedTypeName.get(ClassName.get(Set::class.java), contributingToClassName))
         builder.addModifiers(Modifier.STATIC)
-        builder.addStatement("\$T<\$T> modules = new \$T<>(\$L)",
-                Set::class.java, contributingToClassName, LinkedHashSet::class.java, libraryModuleNames.size)
+        builder.addStatement(
+            "\$T<\$T> modules = new \$T<>(\$L)",
+            Set::class.java, contributingToClassName, LinkedHashSet::class.java, libraryModuleNames.size
+        )
         libraryModuleNames.forEach { libraryModuleName ->
             builder.addStatement("modules.add(new \$T())", elementUtils.getTypeElement(libraryModuleName))
         }
