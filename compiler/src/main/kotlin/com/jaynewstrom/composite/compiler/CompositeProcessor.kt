@@ -28,22 +28,19 @@ import javax.tools.Diagnostic
 
 private const val GENERATED_INDEXER_PACKAGE_NAME: String = "com.jaynewstrom.composite.generated"
 
-class CompositeProcessor : AbstractProcessor() {
+class CompositeAppProcessor : AbstractProcessor() {
     private val appModules = mutableSetOf<Element>()
 
     private val messager: Messager
         get() = processingEnv.messager
     private val filer: Filer
         get() = processingEnv.filer
-    private val typeUtils: Types
-        get() = processingEnv.typeUtils
     private val elementUtils: Elements
         get() = processingEnv.elementUtils
 
     override fun getSupportedAnnotationTypes(): MutableSet<String> {
         return mutableSetOf(
             AppModule::class.java.canonicalName,
-            LibraryModule::class.java.canonicalName,
             LibraryModuleIndexer::class.java.canonicalName
         )
     }
@@ -54,70 +51,19 @@ class CompositeProcessor : AbstractProcessor() {
 
     override fun process(annotations: Set<TypeElement>, roundEnv: RoundEnvironment): Boolean {
         storeAppModules(roundEnv)
-        if (processLibraryModules(roundEnv)) {
-            return true
+
+        // We need to let the other processor do it's thing. We'll do ours in another round.
+        if (roundEnv.getElementsAnnotatedWith(LibraryModule::class.java).isNotEmpty()) {
+            return false
         }
+
         if (appModules.isEmpty()) {
             return false
         }
+
         processAppModules()
+
         return true
-    }
-
-    private fun processLibraryModules(roundEnv: RoundEnvironment): Boolean {
-        var wroteIndexer = false
-        for (element in roundEnv.getElementsAnnotatedWith(LibraryModule::class.java)) {
-            if (element.kind !== ElementKind.CLASS) {
-                error(element, "%s annotations can only be applied to classes!", LibraryModule::class.java.simpleName)
-                return false
-            }
-            val libraryModuleType = element.asType()
-            val annotation = Util.getAnnotation(LibraryModule::class.java, element)
-            val value = annotation["value"]
-            if (value !is TypeMirror) {
-                error(element, "value must be an instance of a TypeMirror")
-                return false
-            }
-            val contributingToElement = typeUtils.asElement(value)
-            val contributingToType = contributingToElement.asType()
-            if (!typeUtils.isAssignable(libraryModuleType, contributingToType)) {
-                error(element, "libraryModule must be of type contributingToType")
-                return false
-            }
-            if (!contributingToElement.modifiers.contains(Modifier.PUBLIC)) {
-                error(element, "contributingTo must be public")
-                return false
-            }
-            if (!element.modifiers.contains(Modifier.PUBLIC)) {
-                error(element, "libraryModule must be public")
-                return false
-            }
-            writeIndexer(element, TypeName.get(contributingToType), TypeName.get(libraryModuleType))
-            wroteIndexer = true
-        }
-        return wroteIndexer
-    }
-
-    private fun writeIndexer(element: Element, contributingToType: TypeName, libraryModuleType: TypeName) {
-        if (contributingToType !is ClassName || libraryModuleType !is ClassName) {
-            error(element, "contributingToType and libraryModuleType must be a ClassName")
-            return
-        }
-        val builder = TypeSpec.classBuilder("LibraryModuleIndexer_" + libraryModuleType.reflectionName().replace('.', '_'))
-            .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
-            .addOriginatingElement(element)
-            .addAnnotation(
-                AnnotationSpec.builder(ClassName.get(LibraryModuleIndexer::class.java))
-                    .addMember("value", "\$S", contributingToType.reflectionName())
-                    .addMember("libraryModule", "\$S", libraryModuleType.reflectionName())
-                    .build()
-            )
-        val file = JavaFile.builder(GENERATED_INDEXER_PACKAGE_NAME, builder.build()).build()
-        try {
-            file.writeTo(filer)
-        } catch (exception: IOException) {
-            error(element, "Failed to write file. \n%s", exception)
-        }
     }
 
     private fun storeAppModules(roundEnv: RoundEnvironment) {
@@ -229,6 +175,89 @@ class CompositeProcessor : AbstractProcessor() {
         }
         builder.addStatement("return modules")
         return builder.build()
+    }
+
+    private fun error(e: Element, msg: String, vararg args: Any) {
+        messager.printMessage(Diagnostic.Kind.ERROR, String.format(msg, *args), e)
+    }
+}
+
+class CompositeLibraryProcessor : AbstractProcessor() {
+    private val messager: Messager
+        get() = processingEnv.messager
+    private val filer: Filer
+        get() = processingEnv.filer
+    private val typeUtils: Types
+        get() = processingEnv.typeUtils
+
+    override fun getSupportedAnnotationTypes(): MutableSet<String> {
+        return mutableSetOf(
+            LibraryModule::class.java.canonicalName
+        )
+    }
+
+    override fun getSupportedSourceVersion(): SourceVersion {
+        return SourceVersion.latestSupported()
+    }
+
+    override fun process(annotations: Set<TypeElement>, roundEnv: RoundEnvironment): Boolean {
+        return processLibraryModules(roundEnv)
+    }
+
+    private fun processLibraryModules(roundEnv: RoundEnvironment): Boolean {
+        var wroteIndexer = false
+        for (element in roundEnv.getElementsAnnotatedWith(LibraryModule::class.java)) {
+            if (element.kind !== ElementKind.CLASS) {
+                error(element, "%s annotations can only be applied to classes!", LibraryModule::class.java.simpleName)
+                return false
+            }
+            val libraryModuleType = element.asType()
+            val annotation = Util.getAnnotation(LibraryModule::class.java, element)
+            val value = annotation["value"]
+            if (value !is TypeMirror) {
+                error(element, "value must be an instance of a TypeMirror")
+                return false
+            }
+            val contributingToElement = typeUtils.asElement(value)
+            val contributingToType = contributingToElement.asType()
+            if (!typeUtils.isAssignable(libraryModuleType, contributingToType)) {
+                error(element, "libraryModule must be of type contributingToType")
+                return false
+            }
+            if (!contributingToElement.modifiers.contains(Modifier.PUBLIC)) {
+                error(element, "contributingTo must be public")
+                return false
+            }
+            if (!element.modifiers.contains(Modifier.PUBLIC)) {
+                error(element, "libraryModule must be public")
+                return false
+            }
+            writeIndexer(element, TypeName.get(contributingToType), TypeName.get(libraryModuleType))
+            wroteIndexer = true
+        }
+        return wroteIndexer
+    }
+
+    private fun writeIndexer(element: Element, contributingToType: TypeName, libraryModuleType: TypeName) {
+        if (contributingToType !is ClassName || libraryModuleType !is ClassName) {
+            error(element, "contributingToType and libraryModuleType must be a ClassName")
+            return
+        }
+        val builder = TypeSpec.classBuilder("LibraryModuleIndexer_" + libraryModuleType.reflectionName().replace('.', '_'))
+            .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+            .addOriginatingElement(element)
+            .addAnnotation(
+                AnnotationSpec.builder(ClassName.get(LibraryModuleIndexer::class.java))
+                    .addMember("value", "\$S", contributingToType.reflectionName())
+                    .addMember("libraryModule", "\$S", libraryModuleType.reflectionName())
+                    .build()
+            )
+        val file = JavaFile.builder(GENERATED_INDEXER_PACKAGE_NAME, builder.build()).build()
+        try {
+            file.writeTo(filer)
+        } catch (exception: IOException) {
+            error(element, "Failed to write file. \n%s", exception)
+        }
     }
 
     private fun error(e: Element, msg: String, vararg args: Any) {
