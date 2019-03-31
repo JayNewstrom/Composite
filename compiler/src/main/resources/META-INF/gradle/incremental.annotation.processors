@@ -1,0 +1,2 @@
+com.jaynewstrom.composite.compiler.CompositeLibraryProcessor,isolating
+com.jaynewstrom.composite.compiler.CompositeAppProcessor,aggregating
