@@ -1,5 +1,4 @@
 apply plugin: 'java'
-apply plugin: 'net.ltgt.apt'
 apply plugin: 'application'
 
 mainClassName = 'sample.app.Main'
@@ -7,6 +6,6 @@ mainClassName = 'sample.app.Main'
 dependencies {
     implementation project(':runtime')
     implementation project(':integration-test-library-java')
-    apt project(':compiler')
+    annotationProcessor project(':compiler')
     implementation project(':reflection')
 }
