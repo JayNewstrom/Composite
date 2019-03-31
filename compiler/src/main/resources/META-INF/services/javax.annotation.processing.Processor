@@ -1,1 +1,2 @@
-com.jaynewstrom.composite.compiler.CompositeProcessor
+com.jaynewstrom.composite.compiler.CompositeLibraryProcessor
+com.jaynewstrom.composite.compiler.CompositeAppProcessor

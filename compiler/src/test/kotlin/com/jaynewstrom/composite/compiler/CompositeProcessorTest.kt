@@ -8,7 +8,8 @@ import java.util.Arrays
 
 class CompositeProcessorTest {
     @Test fun testMultipleAppModules() {
-        val runnableLibraryModule = JavaFileObjects.forSourceString("com.example.FooRunnable", """
+        val runnableLibraryModule = JavaFileObjects.forSourceString(
+            "com.example.FooRunnable", """
                 |package com.example;
                 |import com.jaynewstrom.composite.runtime.LibraryModule;
                 |import java.lang.Runnable;
@@ -17,19 +18,22 @@ class CompositeProcessorTest {
                 |    @Override public void run() {
                 |    }
                 |}
-                |""".trimMargin())
+                |""".trimMargin()
+        )
 
-        val runnableAppModule = JavaFileObjects.forSourceString("com.example.RunnableAppModule", """
+        val runnableAppModule = JavaFileObjects.forSourceString(
+            "com.example.RunnableAppModule", """
                 |package com.example;
                 |import com.jaynewstrom.composite.runtime.AppModule;
                 |import java.lang.Runnable;
                 |@AppModule(Runnable.class)
                 |public final class RunnableAppModule {
                 |}
-                |""".trimMargin())
+                |""".trimMargin()
+        )
 
         val expectedRunnableIndexer = JavaFileObjects.forSourceString(
-                "com.jaynewstrom.composite.generated.LibraryModuleIndexer_com_example_FooRunnable", """
+            "com.jaynewstrom.composite.generated.LibraryModuleIndexer_com_example_FooRunnable", """
                 |package com.jaynewstrom.composite.generated;
                 |
                 |import com.jaynewstrom.composite.runtime.LibraryModuleIndexer;
@@ -37,9 +41,11 @@ class CompositeProcessorTest {
                 |@LibraryModuleIndexer(value = "java.lang.Runnable", libraryModule = "com.example.FooRunnable")
                 |public final class LibraryModuleIndexer_com_example_FooRunnable {
                 |}
-                |""".trimMargin())
+                |""".trimMargin()
+        )
 
-        val expectedGeneratedRunnableModule = JavaFileObjects.forSourceLines("com.example.GeneratedRunnableModule", """
+        val expectedGeneratedRunnableModule = JavaFileObjects.forSourceLines(
+            "com.example.GeneratedRunnableModule", """
                 |package com.example;
                 |
                 |import java.lang.AssertionError;
@@ -58,16 +64,20 @@ class CompositeProcessorTest {
                 |    return modules;
                 |  }
                 |}
-                |""".trimMargin())
+                |""".trimMargin()
+        )
 
-        val testRegistrable = JavaFileObjects.forSourceString("example.TestRegistrable", """
+        val testRegistrable = JavaFileObjects.forSourceString(
+            "example.TestRegistrable", """
                 |package example;
                 |public interface TestRegistrable {
                 |    void test();
                 |}
-                |""".trimMargin())
+                |""".trimMargin()
+        )
 
-        val testRegistrableLibraryModule = JavaFileObjects.forSourceString("example.TestRegistrableLibraryModule", """
+        val testRegistrableLibraryModule = JavaFileObjects.forSourceString(
+            "example.TestRegistrableLibraryModule", """
                 |package example;
                 |import com.jaynewstrom.composite.runtime.LibraryModule;
                 |@LibraryModule(TestRegistrable.class)
@@ -75,18 +85,21 @@ class CompositeProcessorTest {
                 |    @Override public void test() {
                 |    }
                 |}
-                |""".trimMargin())
+                |""".trimMargin()
+        )
 
-        val testRegistrableAppModule = JavaFileObjects.forSourceString("example.TestRegistrableAppModule", """
+        val testRegistrableAppModule = JavaFileObjects.forSourceString(
+            "example.TestRegistrableAppModule", """
                 |package example;
                 |import com.jaynewstrom.composite.runtime.AppModule;
                 |@AppModule(TestRegistrable.class)
                 |public final class TestRegistrableAppModule {
                 |}
-                |""".trimMargin())
+                |""".trimMargin()
+        )
 
         val expectedTestRegistrableIndexer = JavaFileObjects.forSourceString(
-                "com.jaynewstrom.composite.generated.LibraryModuleIndexer_example_TestRegistrableLibraryModule", """
+            "com.jaynewstrom.composite.generated.LibraryModuleIndexer_example_TestRegistrableLibraryModule", """
                 |package com.jaynewstrom.composite.generated;
                 |
                 |import com.jaynewstrom.composite.runtime.LibraryModuleIndexer;
@@ -94,9 +107,11 @@ class CompositeProcessorTest {
                 |@LibraryModuleIndexer(value = "example.TestRegistrable", libraryModule = "example.TestRegistrableLibraryModule")
                 |public final class LibraryModuleIndexer_example_TestRegistrableLibraryModule {
                 |}
-                |""".trimMargin())
+                |""".trimMargin()
+        )
 
-        val expectedGeneratedTestRegistrableModule = JavaFileObjects.forSourceLines("example.GeneratedTestRegistrableModule", """
+        val expectedGeneratedTestRegistrableModule = JavaFileObjects.forSourceLines(
+            "example.GeneratedTestRegistrableModule", """
                 |package example;
                 |
                 |import java.lang.AssertionError;
@@ -114,20 +129,30 @@ class CompositeProcessorTest {
                 |    return modules;
                 |  }
                 |}
-                |""".trimMargin())
+                |""".trimMargin()
+        )
 
         assertAbout(javaSources())
-                .that(Arrays.asList(runnableLibraryModule, runnableAppModule, testRegistrable, testRegistrableLibraryModule,
-                        testRegistrableAppModule))
-                .processedWith(CompositeProcessor())
-                .compilesWithoutError()
-                .and()
-                .generatesSources(expectedRunnableIndexer, expectedGeneratedRunnableModule, expectedTestRegistrableIndexer,
-                        expectedGeneratedTestRegistrableModule)
+            .that(
+                Arrays.asList(
+                    runnableLibraryModule, runnableAppModule, testRegistrable, testRegistrableLibraryModule,
+                    testRegistrableAppModule
+                )
+            )
+            .processedWith(CompositeLibraryProcessor(), CompositeAppProcessor())
+            .compilesWithoutError()
+            .and()
+            .generatesSources(
+                expectedRunnableIndexer,
+                expectedGeneratedRunnableModule,
+                expectedTestRegistrableIndexer,
+                expectedGeneratedTestRegistrableModule
+            )
     }
 
     @Test fun testExcludes() {
-        val fooRunnableModule = JavaFileObjects.forSourceString("com.example.FooRunnable", """
+        val fooRunnableModule = JavaFileObjects.forSourceString(
+            "com.example.FooRunnable", """
                 |package com.example;
                 |import com.jaynewstrom.composite.runtime.LibraryModule;
                 |import java.lang.Runnable;
@@ -136,9 +161,11 @@ class CompositeProcessorTest {
                 |    @Override public void run() {
                 |    }
                 |}
-                |""".trimMargin())
+                |""".trimMargin()
+        )
 
-        val barRunnableModule = JavaFileObjects.forSourceString("com.example.BarRunnable", """
+        val barRunnableModule = JavaFileObjects.forSourceString(
+            "com.example.BarRunnable", """
                 |package com.example;
                 |import com.jaynewstrom.composite.runtime.LibraryModule;
                 |import java.lang.Runnable;
@@ -147,19 +174,22 @@ class CompositeProcessorTest {
                 |    @Override public void run() {
                 |    }
                 |}
-                |""".trimMargin())
+                |""".trimMargin()
+        )
 
-        val runnableAppModule = JavaFileObjects.forSourceString("com.example.RunnableAppModule", """
+        val runnableAppModule = JavaFileObjects.forSourceString(
+            "com.example.RunnableAppModule", """
                 |package com.example;
                 |import com.jaynewstrom.composite.runtime.AppModule;
                 |import java.lang.Runnable;
                 |@AppModule(value = Runnable.class, excludes = "com.example.BarRunnable")
                 |public final class RunnableAppModule {
                 |}
-                |""".trimMargin())
+                |""".trimMargin()
+        )
 
         val expectedRunnableIndexer = JavaFileObjects.forSourceString(
-                "com.jaynewstrom.composite.generated.LibraryModuleIndexer_com_example_FooRunnable", """
+            "com.jaynewstrom.composite.generated.LibraryModuleIndexer_com_example_FooRunnable", """
                 |package com.jaynewstrom.composite.generated;
                 |
                 |import com.jaynewstrom.composite.runtime.LibraryModuleIndexer;
@@ -167,9 +197,11 @@ class CompositeProcessorTest {
                 |@LibraryModuleIndexer(value = "java.lang.Runnable", libraryModule = "com.example.FooRunnable")
                 |public final class LibraryModuleIndexer_com_example_FooRunnable {
                 |}
-                |""".trimMargin())
+                |""".trimMargin()
+        )
 
-        val expectedGeneratedRunnableModule = JavaFileObjects.forSourceLines("com.example.GeneratedRunnableModule", """
+        val expectedGeneratedRunnableModule = JavaFileObjects.forSourceLines(
+            "com.example.GeneratedRunnableModule", """
                 |package com.example;
                 |
                 |import java.lang.AssertionError;
@@ -188,18 +220,20 @@ class CompositeProcessorTest {
                 |    return modules;
                 |  }
                 |}
-                |""".trimMargin())
+                |""".trimMargin()
+        )
 
         assertAbout(javaSources())
-                .that(Arrays.asList(fooRunnableModule, barRunnableModule, runnableAppModule))
-                .processedWith(CompositeProcessor())
-                .compilesWithoutError()
-                .and()
-                .generatesSources(expectedRunnableIndexer, expectedGeneratedRunnableModule)
+            .that(Arrays.asList(fooRunnableModule, barRunnableModule, runnableAppModule))
+            .processedWith(CompositeLibraryProcessor(), CompositeAppProcessor())
+            .compilesWithoutError()
+            .and()
+            .generatesSources(expectedRunnableIndexer, expectedGeneratedRunnableModule)
     }
 
     @Test fun testSingle() {
-        val fooRunnableModule = JavaFileObjects.forSourceString("com.example.FooRunnable", """
+        val fooRunnableModule = JavaFileObjects.forSourceString(
+            "com.example.FooRunnable", """
                 |package com.example;
                 |import com.jaynewstrom.composite.runtime.LibraryModule;
                 |import java.lang.Runnable;
@@ -208,19 +242,22 @@ class CompositeProcessorTest {
                 |    @Override public void run() {
                 |    }
                 |}
-                |""".trimMargin())
+                |""".trimMargin()
+        )
 
-        val runnableAppModule = JavaFileObjects.forSourceString("com.example.RunnableAppModule", """
+        val runnableAppModule = JavaFileObjects.forSourceString(
+            "com.example.RunnableAppModule", """
                 |package com.example;
                 |import com.jaynewstrom.composite.runtime.AppModule;
                 |import java.lang.Runnable;
                 |@AppModule(value = Runnable.class, single = true)
                 |public final class RunnableAppModule {
                 |}
-                |""".trimMargin())
+                |""".trimMargin()
+        )
 
         val expectedRunnableIndexer = JavaFileObjects.forSourceString(
-                "com.jaynewstrom.composite.generated.LibraryModuleIndexer_com_example_FooRunnable", """
+            "com.jaynewstrom.composite.generated.LibraryModuleIndexer_com_example_FooRunnable", """
                 |package com.jaynewstrom.composite.generated;
                 |
                 |import com.jaynewstrom.composite.runtime.LibraryModuleIndexer;
@@ -228,9 +265,11 @@ class CompositeProcessorTest {
                 |@LibraryModuleIndexer(value = "java.lang.Runnable", libraryModule = "com.example.FooRunnable")
                 |public final class LibraryModuleIndexer_com_example_FooRunnable {
                 |}
-                |""".trimMargin())
+                |""".trimMargin()
+        )
 
-        val expectedGeneratedRunnableModule = JavaFileObjects.forSourceLines("com.example.GeneratedRunnableModule", """
+        val expectedGeneratedRunnableModule = JavaFileObjects.forSourceLines(
+            "com.example.GeneratedRunnableModule", """
                 |package com.example;
                 |
                 |import java.lang.AssertionError;
@@ -245,18 +284,20 @@ class CompositeProcessorTest {
                 |    return new FooRunnable();
                 |  }
                 |}
-                |""".trimMargin())
+                |""".trimMargin()
+        )
 
         assertAbout(javaSources())
-                .that(Arrays.asList(fooRunnableModule, runnableAppModule))
-                .processedWith(CompositeProcessor())
-                .compilesWithoutError()
-                .and()
-                .generatesSources(expectedRunnableIndexer, expectedGeneratedRunnableModule)
+            .that(Arrays.asList(fooRunnableModule, runnableAppModule))
+            .processedWith(CompositeLibraryProcessor(), CompositeAppProcessor())
+            .compilesWithoutError()
+            .and()
+            .generatesSources(expectedRunnableIndexer, expectedGeneratedRunnableModule)
     }
 
     @Test fun testAppModuleTriggersMultipleGeneratedAppModules() {
-        val runnableLibraryModule = JavaFileObjects.forSourceString("com.example.FooRunnable", """
+        val runnableLibraryModule = JavaFileObjects.forSourceString(
+            "com.example.FooRunnable", """
                 |package com.example;
                 |import com.jaynewstrom.composite.runtime.LibraryModule;
                 |@LibraryModule(Runnable.class)
@@ -264,10 +305,11 @@ class CompositeProcessorTest {
                 |    @Override public void run() {
                 |    }
                 |}
-                |""".trimMargin())
+                |""".trimMargin()
+        )
 
         val expectedRunnableIndexer = JavaFileObjects.forSourceString(
-                "com.jaynewstrom.composite.generated.LibraryModuleIndexer_com_example_FooRunnable", """
+            "com.jaynewstrom.composite.generated.LibraryModuleIndexer_com_example_FooRunnable", """
                 |package com.jaynewstrom.composite.generated;
                 |
                 |import com.jaynewstrom.composite.runtime.LibraryModuleIndexer;
@@ -275,9 +317,11 @@ class CompositeProcessorTest {
                 |@LibraryModuleIndexer(value = "java.lang.Runnable", libraryModule = "com.example.FooRunnable")
                 |public final class LibraryModuleIndexer_com_example_FooRunnable {
                 |}
-                |""".trimMargin())
+                |""".trimMargin()
+        )
 
-        val expectedGeneratedRunnableModule = JavaFileObjects.forSourceLines("foo.example.GeneratedRunnableModule", """
+        val expectedGeneratedRunnableModule = JavaFileObjects.forSourceLines(
+            "foo.example.GeneratedRunnableModule", """
                 |package foo.example;
                 |
                 |import com.example.FooRunnable;
@@ -297,16 +341,20 @@ class CompositeProcessorTest {
                 |    return modules;
                 |  }
                 |}
-                |""".trimMargin())
+                |""".trimMargin()
+        )
 
-        val testRegistrable = JavaFileObjects.forSourceString("example.TestRegistrable", """
+        val testRegistrable = JavaFileObjects.forSourceString(
+            "example.TestRegistrable", """
                 |package example;
                 |public interface TestRegistrable {
                 |    void test();
                 |}
-                |""".trimMargin())
+                |""".trimMargin()
+        )
 
-        val testRegistrableLibraryModule = JavaFileObjects.forSourceString("example.TestRegistrableLibraryModule", """
+        val testRegistrableLibraryModule = JavaFileObjects.forSourceString(
+            "example.TestRegistrableLibraryModule", """
                 |package example;
                 |import com.jaynewstrom.composite.runtime.LibraryModule;
                 |@LibraryModule(TestRegistrable.class)
@@ -314,10 +362,11 @@ class CompositeProcessorTest {
                 |    @Override public void test() {
                 |    }
                 |}
-                |""".trimMargin())
+                |""".trimMargin()
+        )
 
         val expectedTestRegistrableIndexer = JavaFileObjects.forSourceString(
-                "com.jaynewstrom.composite.generated.LibraryModuleIndexer_example_TestRegistrableLibraryModule", """
+            "com.jaynewstrom.composite.generated.LibraryModuleIndexer_example_TestRegistrableLibraryModule", """
                 |package com.jaynewstrom.composite.generated;
                 |
                 |import com.jaynewstrom.composite.runtime.LibraryModuleIndexer;
@@ -325,9 +374,11 @@ class CompositeProcessorTest {
                 |@LibraryModuleIndexer(value = "example.TestRegistrable", libraryModule = "example.TestRegistrableLibraryModule")
                 |public final class LibraryModuleIndexer_example_TestRegistrableLibraryModule {
                 |}
-                |""".trimMargin())
+                |""".trimMargin()
+        )
 
-        val expectedGeneratedTestRegistrableModule = JavaFileObjects.forSourceLines("foo.example.GeneratedTestRegistrableModule", """
+        val expectedGeneratedTestRegistrableModule = JavaFileObjects.forSourceLines(
+            "foo.example.GeneratedTestRegistrableModule", """
                 |package foo.example;
                 |
                 |import example.TestRegistrable;
@@ -347,9 +398,11 @@ class CompositeProcessorTest {
                 |    return modules;
                 |  }
                 |}
-                |""".trimMargin())
+                |""".trimMargin()
+        )
 
-        val appModule = JavaFileObjects.forSourceString("foo.example.RunnableAppModule", """
+        val appModule = JavaFileObjects.forSourceString(
+            "foo.example.RunnableAppModule", """
                 |package foo.example;
                 |import com.jaynewstrom.composite.runtime.AppModule;
                 |import java.lang.Runnable;
@@ -357,14 +410,19 @@ class CompositeProcessorTest {
                 |@AppModule({Runnable.class, TestRegistrable.class})
                 |public final class RunnableAppModule {
                 |}
-                |""".trimMargin())
+                |""".trimMargin()
+        )
 
         assertAbout(javaSources())
-                .that(Arrays.asList(runnableLibraryModule, appModule, testRegistrable, testRegistrableLibraryModule))
-                .processedWith(CompositeProcessor())
-                .compilesWithoutError()
-                .and()
-                .generatesSources(expectedRunnableIndexer, expectedGeneratedRunnableModule, expectedTestRegistrableIndexer,
-                        expectedGeneratedTestRegistrableModule)
+            .that(Arrays.asList(runnableLibraryModule, appModule, testRegistrable, testRegistrableLibraryModule))
+            .processedWith(CompositeLibraryProcessor(), CompositeAppProcessor())
+            .compilesWithoutError()
+            .and()
+            .generatesSources(
+                expectedRunnableIndexer,
+                expectedGeneratedRunnableModule,
+                expectedTestRegistrableIndexer,
+                expectedGeneratedTestRegistrableModule
+            )
     }
 }
